@@ -1,0 +1,8 @@
+.vscode/
+*.pdf
+[Bb]uild*/
+[Dd]bug*/
+
+[Dd][Oo][Cc][Ss]/*
+![Dd][Oo][Cc][Ss]/[Dd]oxyfile
+![Dd][Oo][Cc][Ss]/*.docx
