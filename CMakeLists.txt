@@ -13,6 +13,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+add_subdirectory(Matrix/)
+
 add_executable(${PROJECT_NAME}
     src/main.cpp
 )
@@ -28,6 +30,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     src/
 )
 
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Matrix
+)
+
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror --pedantic-errors)
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
@@ -36,4 +42,5 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
     <memory>
     <functional>
     <utility>
+    <cstring>
 )

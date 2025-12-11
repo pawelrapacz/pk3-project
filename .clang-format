@@ -71,19 +71,19 @@ AlignTrailingComments:
     OverEmptyLines: 4
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
-AllowBreakBeforeNoexceptSpecifier: Never
+AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
 AllowShortBlocksOnASingleLine: Always
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: WithoutElse
 AllowShortLambdasOnASingleLine: All
-AllowShortLoopsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
 AllowShortNamespacesOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
-AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakBeforeMultilineStrings: false
 AttributeMacros:
     - __capability
 BinPackArguments: true
@@ -96,7 +96,7 @@ BraceWrapping:
     AfterEnum: false
     AfterExternBlock: false
     AfterFunction: false
-    AfterNamespace: true
+    AfterNamespace: false
     AfterObjCDeclaration: false
     AfterStruct: false
     AfterUnion: false
@@ -109,15 +109,26 @@ BraceWrapping:
     SplitEmptyRecord: false
     SplitEmptyNamespace: false
 BreakAdjacentStringLiterals: true
-BreakAfterAttributes: Leave
+BreakAfterAttributes: Always
 BreakAfterJavaFieldAnnotations: false
+# v22
+# BreakAfterOpenBracketBracedList: true
+# BreakAfterOpenBracketFunction: false
+# BreakAfterOpenBracketIf: false
+# reakAfterOpenBracketSwitch: true
 BreakAfterReturnType: Automatic
 BreakArrays: false
 BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Custom
+# v22
+# BreakBeforeCloseBracketBracedList: true
+# BreakBeforeCloseBracketFunction: true
+# BreakBeforeCloseBracketIf: true
+# BreakBeforeCloseBracketLoop: true
+# BreakBeforeCloseBracketSwitch: true
 BreakBeforeConceptDeclarations: Always
 BreakBeforeInlineASMColon: OnlyMultiline
-# BreakBeforeTemplateCloser: true
+BreakBeforeTemplateCloser: true
 BreakBeforeTernaryOperators: true
 BreakBinaryOperations: Never
 BreakConstructorInitializers: BeforeColon
@@ -130,7 +141,7 @@ CommentPragmas: '^ IWYU pragma:'
 CompactNamespaces: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: true
+Cpp11BracedListStyle: false
 DerivePointerAlignment: false
 DisableFormat: false
 EmptyLineAfterAccessModifier: Never
@@ -265,7 +276,7 @@ SortJavaStaticImport: Before
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
-# SpaceAfterOperatorKeyword: false
+SpaceAfterOperatorKeyword: false
 SpaceAfterTemplateKeyword: false
 SpaceAroundPointerQualifiers: Default
 SpaceBeforeAssignmentOperators: true
@@ -288,7 +299,7 @@ SpaceBeforeParensOptions:
     BeforeNonEmptyParentheses: false
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
-SpaceInEmptyBlock: false
+SpaceInEmptyBlock: true
 SpacesBeforeTrailingComments: 2
 SpacesInAngles: Never
 SpacesInContainerLiterals: true
@@ -302,7 +313,7 @@ SpacesInParensOptions:
     InConditionalStatements: false
     InEmptyParentheses: false
     Other: false
-SpacesInSquareBrackets: false
+SpacesInSquareBrackets: true
 Standard: Auto
 StatementAttributeLikeMacros:
     - Q_EMIT
