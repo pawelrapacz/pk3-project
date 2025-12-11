@@ -1,4 +1,5 @@
 .vscode/
+.cache/
 *.pdf
 [Bb]uild*/
 [Dd]bug*/
