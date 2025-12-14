@@ -2,23 +2,23 @@
 
 int main() {
     CRSMatrix<double> m1({
-    { 3, 0, 0 },
-    { 0, 1, 0 },
-    { 2, 0, 0 },
+    { 1, -1 },
     });
     CRSMatrix<double> m2({
-    { 0, 4, 1 },
-    { 0, 0, 0 },
-    { 0, 0, 5 },
+    { 1, 0, 1 },
+    { 1, 0, 1 },
     });
 
     m1.print();
-    m1.transpose();
-    m1.print();
+    // m1.transpose();
+    // m1.print();
 
     m2.print();
-    m2.transpose();
-    m2.print();
+    // m2.transpose();
+    // m2.print();
+
+    auto m = m1 * (m2);
+    m.print();
 
     // CRSMatrix<double> matrix2({
     //     { 10, 20,  0,  0,  0,  0 },

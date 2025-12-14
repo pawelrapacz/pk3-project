@@ -16,6 +16,14 @@ public:
     struct Dimensions {
         size_type rows;
         size_type cols;
+
+        inline constexpr bool operator==(const Dimensions& o) {
+            return rows == o.rows && cols == o.cols;
+        }
+
+        inline constexpr bool operator!=(const Dimensions& o) {
+            return rows != o.rows || cols != o.cols;
+        }
     };
 
 
@@ -30,7 +38,7 @@ public:
           _col_index(new size_type[ _nnz ]),
           _row_index(new size_type[ Rows + 1 ]) {
         _row_index[ 0 ]  = 0;
-        size_type nnzTmp = 0;
+        size_type nnzTmp {};
 
         for (size_type i = 0; i < rows(); i++) {
             for (size_type j = 0; j < cols(); j++) {
@@ -49,10 +57,10 @@ public:
         if (not other.empty()) {
             _v         = new Tp[ _nnz ];
             _col_index = new size_type[ _nnz ];
-            _row_index = new size_type[ ridx_count() ];
+            _row_index = new size_type[ ridx_size() ];
             std::memcpy(_v, other._v, sizeof(Tp) * _nnz);
             std::memcpy(_col_index, other._col_index, sizeof(size_type) * _nnz);
-            std::memcpy(_row_index, other._row_index, sizeof(size_type) * (ridx_count()));
+            std::memcpy(_row_index, other._row_index, sizeof(size_type) * (ridx_size()));
         }
     }
 
@@ -63,7 +71,7 @@ public:
           _col_index(other._col_index),
           _row_index(other._row_index) {
         other._dim = Dimensions();
-        other._nnz       = 0;
+        other._nnz       = size_type();
         other._v         = nullptr;
         other._col_index = nullptr;
         other._row_index = nullptr;
@@ -84,10 +92,10 @@ public:
         _nnz       = number_of_non_zeros(m);
         _v         = new Tp[ _nnz ];
         _col_index = new size_type[ _nnz ];
-        _row_index = new size_type[ ridx_count() ];
+        _row_index = new size_type[ ridx_size() ];
 
         _row_index[ 0 ]  = 0;
-        size_type nnzTmp = 0;
+        size_type nnzTmp {};
 
         for (size_type i = 0; i < rows(); i++) {
             for (size_type j = 0; j < cols(); j++) {
@@ -109,10 +117,10 @@ public:
             _nnz       = other._nnz;
             _v         = new Tp[ _nnz ];
             _col_index = new size_type[ _nnz ];
-            _row_index = new size_type[ ridx_count() ];
+            _row_index = new size_type[ ridx_size() ];
             std::memcpy(_v, other._v, sizeof(Tp) * _nnz);
             std::memcpy(_col_index, other._col_index, sizeof(size_type) * _nnz);
-            std::memcpy(_row_index, other._row_index, sizeof(size_type) * (ridx_count()));
+            std::memcpy(_row_index, other._row_index, sizeof(size_type) * (ridx_size()));
         }
         return *this;
     }
@@ -126,7 +134,7 @@ public:
             _row_index = other._row_index;
 
             other._dim = Dimensions();
-            other._nnz       = 0;
+            other._nnz       = size_type();
             other._v         = nullptr;
             other._col_index = nullptr;
             other._row_index = nullptr;
@@ -139,11 +147,14 @@ public:
         delete[] _col_index;
         delete[] _row_index;
         _dim = Dimensions();
-        _nnz       = 0;
+        _nnz       = size_type();
         _v         = nullptr;
         _col_index = nullptr;
         _row_index = nullptr;
     }
+
+    inline bool is_zero_matrix() const noexcept
+    { return _nnz == size_type(); }
 
     inline bool empty() const noexcept
     { return _row_index == nullptr; }
@@ -160,15 +171,199 @@ public:
     
 
     // scalar multiplication
-    CRSMatrix operator*(Tp val) const {
+    inline CRSMatrix operator*(Tp val) const {
         CRSMatrix out = *this;
         out *= val;
         return out;
     }
     
-    CRSMatrix& operator*=(Tp val) noexcept {
+    inline CRSMatrix& operator*=(Tp val) noexcept {
         for (size_type i = 0; i < _nnz; i++)
             _v[i] *= val;
+    }
+
+    // matrix multiplication
+    CRSMatrix operator*(const CRSMatrix& other) const {
+        if (cols() != other.rows()) throw;
+
+        CRSMatrix out;
+        out._dim = {rows(), other.cols()};
+        out._row_index = new size_type[ridx_size()];
+        out._row_index[0] = 0;
+
+        CRSMatrix m = other;
+        m.transpose();
+
+        // wyznaczanie nnz
+        for (size_type i = 0; i < rows(); i++) {
+            if (nnz_row(i)) {
+            for (size_type j = 0; j < m.rows(); j++) {
+                if (!m.nnz_row(j)) continue;
+                Tp val{};
+                size_type posA = _row_index[i], posB = m._row_index[j];
+                while (posA < _row_index[i + 1] && posB < m._row_index[j + 1]) {
+                    if (_col_index[posA] == m._col_index[posB]) {
+                        val += _v[posA] * m._v[posB];
+                        posA++;
+                        posB++;
+                    }
+                    else if (_col_index[posA] < m._col_index[posB]) {
+                        posA++;
+                    }
+                    else {
+                        posB++;
+                    }
+                }
+
+                if (val) {
+                    out._nnz++;
+                }
+            }
+            }
+            out._row_index[i + 1] = out._nnz;
+        }
+
+        out._v = new Tp[out._nnz];
+        out._col_index = new size_type[out._nnz];
+        out._nnz = size_type();
+        
+
+        for (size_type i = 0; i < rows(); i++) {
+            if (nnz_row(i)) {
+            for (size_type j = 0; j < other.cols(); j++) {
+                // if (!m.nnz_row(j)) continue;
+                Tp val{};
+                size_type posA = _row_index[i], posB = m._row_index[j];
+                while (posA < _row_index[i + 1] && posB < m._row_index[j + 1]) {
+                    if (_col_index[posA] == m._col_index[posB]) {
+                        val += _v[posA] * m._v[posB];
+                        posA++;
+                        posB++;
+                    }
+                    else if (_col_index[posA] < m._col_index[posB]) {
+                        posA++;
+                    }
+                    else {
+                        posB++;
+                    }
+                }
+
+                if (val) {
+                    out._v[out._nnz] = val;
+                    out._col_index[out._nnz] = j;
+                    out._nnz++;
+                }
+            }
+            }
+        }
+
+        return out;
+    }
+
+    inline CRSMatrix& operator*=(const CRSMatrix& other) {
+        *this = *this * other;
+        return *this;
+    }
+
+    // addition
+    CRSMatrix operator+(const CRSMatrix& other) const {
+        if (dim() != other.dim()) throw;
+
+        CRSMatrix out;
+        out._dim = dim();
+        out._row_index = new size_type[out.ridx_size()];
+        out._row_index[0] = 0;
+
+        // wyznaczanie nnz i _row_index
+        for (size_type i = 0; i < rows(); i++) {
+
+            size_type posA = _row_index[i], posB = other._row_index[i];
+
+            while (posA < _row_index[i + 1] && posB < other._row_index[i + 1]) {
+                if (_col_index[posA] == other._col_index[posB]) {
+                    if (_v[posA] + _v[posB] != Tp())
+                        out._nnz++;
+
+                    posA++;
+                    posB++;
+                }
+                else if (_col_index[posA] < other._col_index[posB]) {
+                    posA++;
+                    out._nnz++;
+                }
+                else {
+                    posB++;
+                    out._nnz++;
+                }
+            }
+            // obliczamy pozostałe nnz w wierszu (jeden z nich zawsze 0)
+            out._nnz += (_row_index[i + 1] - posA) + (other._row_index[i + 1] - posB);
+            out._row_index[i + 1] = out._nnz;
+        }
+
+        out._v = new Tp[out._nnz];
+        out._col_index = new size_type[out._nnz];
+        out._nnz = size_type();
+
+        for (size_type i = 0 ; i < rows(); i++) {
+
+            size_type posA = _row_index[i], posB = other._row_index[i];
+
+            // zakresy pokrywają się
+            while (posA < _row_index[i + 1] && posB < other._row_index[i + 1]) {
+                if (_col_index[posA] == other._col_index[posB]) {
+                    if (_v[posA] + _v[posB] != Tp()) {
+                        out._v[out._nnz] = _v[posA] + _v[posB];
+                        out._col_index[out._nnz] = _col_index[posA];
+                        out._nnz++;
+                    }
+                    posA++;
+                    posB++;
+                }
+                else if (_col_index[posA] < other._col_index[posB]) {
+                    out._v[out._nnz] = _v[posA];
+                    out._col_index[out._nnz++] = _col_index[posA++];
+                }
+                else {
+                    out._v[out._nnz] = other._v[posB];
+                    out._col_index[out._nnz++] = other._col_index[posB++];
+                }
+            }
+
+            while (posA < _row_index[i + 1]) {
+                out._v[out._nnz] = _v[posA];
+                out._col_index[out._nnz++] = _col_index[posA++];
+            }
+
+            while (posB < other._row_index[i + 1]) {
+                out._v[out._nnz] = other._v[posB];
+                out._col_index[out._nnz++] = other._col_index[posB++];
+            }
+        }
+
+        return out;
+    }
+
+    inline CRSMatrix& operator+=(const CRSMatrix& other) {
+        *this = *this + other;
+        return *this;
+    }
+
+    inline CRSMatrix operator-() const {
+        CRSMatrix out(*this);
+        for (size_type i = 0; i < out._nnz; i++)
+            out._v[i] = -out._v[i];
+
+        return out;
+    }
+
+    inline CRSMatrix operator-(const CRSMatrix& other) const {
+        return *this + (-other);
+    }
+
+    inline CRSMatrix& operator-=(const CRSMatrix& other) {
+        *this = *this - other;
+        return *this;
     }
     
     void transpose() {
@@ -185,7 +380,7 @@ public:
         for (size_type i = 0; i < _nnz; i++)
             n._row_index[_col_index[i] + 1]++;
 
-        for (size_type i = 0; i < n.ridx_count(); i++) {
+        for (size_type i = 0; i < n.ridx_size(); i++) {
             n._row_index[i + 1] += n._row_index[i];
             pos_ptr[i + 1] = n._row_index[i + 1]; // kopia
         }
@@ -208,7 +403,7 @@ public:
     
 
     void print() const {
-        if (_v) {
+        if (!empty()) {
             std::cout << "\nV = [ ";
             for (size_type i = 0; i < _nnz; i++) std::cout << _v[ i ] << ", ";
 
@@ -216,16 +411,17 @@ public:
             for (size_type i = 0; i < _nnz; i++) std::cout << _col_index[ i ] << ", ";
 
             std::cout << "]\nROW_INDEX = [ ";
-            for (size_type i = 0; i < ridx_count(); i++) std::cout << _row_index[ i ] << ", ";
+            for (size_type i = 0; i < ridx_size(); i++) std::cout << _row_index[ i ] << ", ";
             std::cout << "]\n";
         }
-        else { std::cout << "\nV = [ ]\nCOL_INDEX = [ ]\nROW_INDEX = [ ]\n"; }
+        else { std::cout << "\nEMPTY!"; }
     }
 
 
 protected:
-    inline size_type ridx_count() const noexcept
-    { return _dim.rows + 1; }
+    inline size_type ridx_size() const noexcept {
+        return _dim.rows + 1;
+    }
 
     inline size_type nnz_row(size_type idx) const noexcept {
         return _row_index[idx + 1] - _row_index[idx];
