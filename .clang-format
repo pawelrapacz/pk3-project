@@ -72,13 +72,13 @@ AlignTrailingComments:
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
-AllowShortBlocksOnASingleLine: Always
+AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
 AllowShortNamespacesOnASingleLine: false
@@ -313,7 +313,7 @@ SpacesInParensOptions:
     InConditionalStatements: false
     InEmptyParentheses: false
     Other: false
-SpacesInSquareBrackets: true
+SpacesInSquareBrackets: false
 Standard: Auto
 StatementAttributeLikeMacros:
     - Q_EMIT

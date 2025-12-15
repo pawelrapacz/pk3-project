@@ -1,33 +1,66 @@
+#include <iostream>
+
 #include "Matrix.h"
 
 int main() {
     CRSMatrix<double> m1({
+        { 5, 0, 0, 0 },
+        { 0, 8, 0, 0 },
+        { 0, 0, 3, 0 },
+        { 0, 6, 0, 0 }
+    });
+
+    std::cout << "Transpozycja: \n";
+    auto m1t = m1;
+    m1t.transpose();
+    m1.printm();
+    m1t.printm();
+
+    CRSMatrix<double> m2({
+        { 3, 0, 0, 0 },
+        { 0, 8, 6, 0 },
+        { 1, 0, 0, 0 },
+        { 0, 0, 0, 0 }
+    });
+
+    std::cout << "\nDodawanie:\n";
+    m1.printm();
+    m2.printm();
+    (m1 + m2).printm();
+
+    std::cout << "\nOdejmowanie:\n";
+    m1.printm();
+    m2.printm();
+    (m1 - m2).printm();
+
+
+    std::cout << "\nMnożenie:\n";
+    m1.printm();
+    m2.printm();
+    (m1 * m2).printm();
+
+
+    CRSMatrix<int> m3({
         { 1, -1 },
     });
-    CRSMatrix<double> m2({
+
+    CRSMatrix<int> m4({
         { 1, 0, 1 },
         { 1, 0, 1 },
     });
 
-    m1.print();
-    // m1.transpose();
-    // m1.print();
+    std::cout << "\nMnożenie:\n";
+    m3.printm();
+    m4.printm();
+    (m3 * m4).printm();
 
-    m2.print();
-    // m2.transpose();
-    // m2.print();
 
-    auto m = m1 * (m2);
-    m.print();
-
-    // CRSMatrix<double> matrix2({
+    // CRSMatrix<int> matrix1({
     // { 10, 20,  0,  0,  0,  0 },
     // {  0, 30,  0,  4,  0,  0 },
     // {  0,  0, 50, 60, 70,  0 },
     // {  0,  0,  0,  0,  0, 80 }
     // });
-    // matrix2.print();
-
 
     // CRSMatrix<double> matrix3({
     // { 0, 0,  0,  0, 0, 0, 7,  0, 0, 0 },
@@ -130,38 +163,5 @@ int main() {
     // });
     // matrix5.print();
 
-
-    // matrix1.print();
-    // matrix1.transpose();
-    // matrix1.print();
-
-    // matrix2.print();
-    // matrix2.transpose();
-    // matrix2.print();
-
-
-    // auto a = matrix1;
-    // a.print();
-    // matrix1.print();
-
-
-    // auto b = std::move(matrix1);
-    // b.print();
-    // matrix1.print();
-
-    // std::cout << "\nhello" << std::flush;
-    // a = std::move(matrix1);
-    // std::cout << "\nhello" << std::flush;
-    // a.print();
-
-    // CRSMatrix<int> abc;
-    // CRSMatrix<int> cba(abc);
-
-    // std::cout << "\nhello" << std::flush;
-    // b = a;
-    // b.print();
-
-    // b = std::move(a);
-    // b.print();
     return 0;
 }
